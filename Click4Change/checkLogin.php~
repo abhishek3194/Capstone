@@ -1,0 +1,39 @@
+<?php
+
+
+$_POST['username'] = "9478088896";
+
+$_POST['password'] = "password";
+
+
+checkLogin($_POST['username'],$_POST['password']);
+
+function checkLogin ($username, $password)
+{
+$con=mysqli_connect("localhost","root","bansal","ClickForChange");
+
+if (mysqli_connect_errno($con))
+{
+   echo "Failed to connect to MySQL: " . mysqli_connect_error();
+}
+
+$result = mysqli_query($con,"SELECT password FROM UserDetails where Username='$username' and Password='$password'");
+$row = mysqli_fetch_array($result);
+$data = $row[0];
+
+if($data){
+echo "Login Successful";
+$status = "Login Successful";
+}
+else
+{
+echo "login Unsuccessful";
+$status = "Login UnSuccessful";
+}
+
+return $status;
+
+mysqli_close($con);
+}
+
+?>
