@@ -29,4 +29,6 @@ dependencies {
     compile "com.android.support:design:${supportLibVersion}"
     //compile 'com.google.android.gms:play-services:6.5.87'
     compile 'com.google.android.gms:play-services:6.5.87'
+    // CardView
+    compile "com.android.support:cardview-v7:${supportLibVersion}"
 }

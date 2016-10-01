@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/logo"
         />
@@ -82,6 +82,20 @@
     </RadioGroup>
 
     <android.support.design.widget.TextInputLayout
+        android:id="@+id/input_layout_addr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/user_addr_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Address"
+            android:inputType="text"
+            />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
         android:id="@+id/input_layout_pass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -115,7 +129,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="REGISTER"
-        android:background="#992031"
+        android:background="@color/colorPrimary"
         android:onClick="RegisterMember"
         />
 

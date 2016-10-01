@@ -1,4 +1,4 @@
-package com.example.poornima.clickforchange;
+package ServerSideAPIs;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -11,11 +11,13 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
+import CommunicationInterface.Communcation;
+
 /**
  * Created by poornima on 11/9/16.
  */
 
-    public class AddNewMember extends AsyncTask<String,Void,Boolean>
+    public class AddNewMember extends AsyncTask<String,Void,String>
 
     {
         private static final String LOG_TAG = "REGISTER: ";
@@ -27,7 +29,9 @@ import java.net.URLEncoder;
 
 
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected String doInBackground(String... params) {
+
+            String statusText = null;
 
             try{
 
@@ -37,7 +41,7 @@ import java.net.URLEncoder;
                 String emailAddr = params[3];
                 String gender = params[4];
 
-                String link="http://172.31.77.196/Click4Change/addNewMember.php";
+                String link=ServerConfig.SERVER+"addNewMember.php";
                 String data  = URLEncoder.encode("username", "UTF-8") + "=" + URLEncoder.encode(username, "UTF-8");
                 data += "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(password, "UTF-8");
                 data += "&" + URLEncoder.encode("phone", "UTF-8") + "=" + URLEncoder.encode(phone, "UTF-8");
@@ -64,18 +68,10 @@ import java.net.URLEncoder;
                     sb.append(line);
 
                 }
-                String statusText = sb.toString();
+                statusText = sb.toString();
                 Log.v(LOG_TAG, statusText);
 
-                if(statusText.equals("Successful"))
-                {
-                    return true;
-                }
-
-                else
-                {
-                    return false;
-                }
+               return statusText;
                 //Toast.makeText(this.context, statusText, Toast.LENGTH_SHORT).show();
             }
             catch(Exception e){
@@ -83,7 +79,17 @@ import java.net.URLEncoder;
             }
 
 
-            return null;
+            return statusText;
+
         }
+
+        @Override
+        protected void onPostExecute(String result){
+            Communcation l =  (Communcation)context;
+            l.onComplition(result);
+
+        }
+
+
     }
 

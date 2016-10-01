@@ -1,4 +1,4 @@
-package com.example.poornima.clickforchange;
+package ServerSideAPIs;
 
 /**
  * Created by poornima on 9/9/16.
@@ -16,7 +16,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
-public class CheckLoginActivity extends AsyncTask<String,Void,String>{
+import CommunicationInterface.Communcation;
+
+public class CheckLoginActivity extends AsyncTask<String,Void,String> {
 
     private static final String LOG_TAG = "SIGN IN";
     private Context context;
@@ -45,7 +47,7 @@ public class CheckLoginActivity extends AsyncTask<String,Void,String>{
 
             String password = params[1];
 
-            String link="http://172.31.77.196/Click4Change/checkLogin.php";
+            String link=ServerConfig.SERVER+"checkLogin.php";
             String data  = URLEncoder.encode("username", "UTF-8") + "=" + URLEncoder.encode(username, "UTF-8");
             data += "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(password, "UTF-8");
 
@@ -84,8 +86,10 @@ public class CheckLoginActivity extends AsyncTask<String,Void,String>{
 
     @Override
     protected void onPostExecute(String result){
-        /*Toast.makeText(this.context, statusText, Toast.LENGTH_SHORT);
-        this.statusField.setText(statusText);*/
+        Communcation l =  (Communcation)context;
+        l.onComplition(result);
 
     }
+
+
 }

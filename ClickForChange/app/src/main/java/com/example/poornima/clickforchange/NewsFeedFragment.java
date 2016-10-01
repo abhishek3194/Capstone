@@ -104,7 +104,7 @@ public class NewsFeedFragment extends Fragment {
 
         List<String> weekForecast = new ArrayList<String>(Arrays.asList(forecastArray));
 
-        forecast_adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, weekForecast);
+        forecast_adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_newsfeed, R.id.list_item_forecast_textview, weekForecast);
 
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
 

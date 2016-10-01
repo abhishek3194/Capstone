@@ -10,10 +10,11 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import java.util.concurrent.ExecutionException;
+import CommunicationInterface.Communcation;
+import ServerSideAPIs.AddNewMember;
 
 
-public class RegisterMember extends ActionBarActivity {
+public class RegisterMember extends ActionBarActivity implements Communcation {
 
     private String name;
     private String phone;
@@ -21,7 +22,7 @@ public class RegisterMember extends ActionBarActivity {
     private String confirm_password;
     private String gender;
     private String emailAddr;
-    private boolean AdditionStatusText;
+    private String AdditionStatusText;
 
 
     @Override
@@ -89,31 +90,37 @@ public class RegisterMember extends ActionBarActivity {
 
         if(password.equals(confirm_password))
         {
-            try {
-                AdditionStatusText = new AddNewMember(this).execute(name,password,phone,emailAddr,gender).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-
-            if(AdditionStatusText)
-            {
-                Toast.makeText(this,"Registered successfully",Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, NewsFeedActivity.class);
-                startActivity(intent);
-            }
-
-            else
-            {
-                Toast.makeText(this,"Please try again later",Toast.LENGTH_SHORT).show();
-            }
+             new AddNewMember(this).execute(name,password,phone,emailAddr,gender);
         }
 
         else
         {
             Toast.makeText(this,"Confirm password does not match",Toast.LENGTH_SHORT).show();
 
+        }
+    }
+
+    @Override
+    public void onComplition(String response) {
+
+        AdditionStatusText = response;
+
+        addMember();
+
+    }
+
+    public void addMember()
+    {
+        if(AdditionStatusText.equals("Success"))
+        {
+            Toast.makeText(this,"Registered successfully",Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, NewsFeedActivity.class);
+            startActivity(intent);
+        }
+
+        else
+        {
+            Toast.makeText(this,"Please try again later",Toast.LENGTH_SHORT).show();
         }
     }
 }
