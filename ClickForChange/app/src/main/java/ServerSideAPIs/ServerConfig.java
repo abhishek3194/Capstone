@@ -5,5 +5,5 @@ package ServerSideAPIs;
  */
 public class ServerConfig {
 
-    public static String SERVER = "http://172.31.75.223/Click4Change/";
+    public static String SERVER = "http://192.168.1.9/Click4Change/";
 }

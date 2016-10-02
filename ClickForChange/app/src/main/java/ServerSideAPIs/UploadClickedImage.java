@@ -25,11 +25,15 @@ public class UploadClickedImage extends AsyncTask<Void,Void,String>{
     private String user_id;
     private static String TAG = "ERROR ON UPLOAD:";
     String statusText="";
+    double latitude;
+    double longitude;
 
-    public UploadClickedImage(Bitmap image,Context context,String user_id){
+    public UploadClickedImage(Bitmap image,Context context,String user_id,double latitude,double longitude){
         this.image = image;
         this.context = context;
         this.user_id = user_id;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     @Override
@@ -45,8 +49,10 @@ public class UploadClickedImage extends AsyncTask<Void,Void,String>{
             String link=ServerConfig.SERVER+"upload.php";
             String data  = URLEncoder.encode("image", "UTF-8") + "=" + URLEncoder.encode(encodeImage, "UTF-8");
             data += "&" + URLEncoder.encode("user_id", "UTF-8") + "=" + URLEncoder.encode(user_id, "UTF-8");
+            data += "&" + URLEncoder.encode("latitude", "UTF-8") + "=" + URLEncoder.encode(String.valueOf(latitude), "UTF-8");
+            data += "&" + URLEncoder.encode("longitude", "UTF-8") + "=" + URLEncoder.encode(String.valueOf(longitude), "UTF-8");
 
-           Log.v(TAG,data);
+           Log.e(TAG,data);
 
             URL url = new URL(link);
             URLConnection conn = url.openConnection();
@@ -70,7 +76,7 @@ public class UploadClickedImage extends AsyncTask<Void,Void,String>{
 
             }
             statusText = sb.toString();
-            Log.v(TAG, statusText);
+            Log.e(TAG, statusText);
 
             return statusText;
             //Toast.makeText(this.context, statusText, Toast.LENGTH_SHORT).show();

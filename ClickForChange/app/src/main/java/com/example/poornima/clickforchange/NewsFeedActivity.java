@@ -3,6 +3,7 @@ package com.example.poornima.clickforchange;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.location.Location;
 import android.location.LocationManager;
@@ -20,10 +21,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,15 +33,12 @@ import ServerSideAPIs.UploadClickedImage;
 
 public class NewsFeedActivity extends ActionBarActivity {
 
-    private File destination;
-    private String imagePath;
 
+    public final String APP_TAG = "CAMERA";
+    public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
+    public String photoFileName;
 
-    Intent imageIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-    String pathMedia = Environment.getExternalStorageDirectory().getAbsolutePath() + "/data/data/ClickForChange/.data";
-    File image;
-
-
+    public File image_file;
 
 
     @Override
@@ -80,45 +77,50 @@ public class NewsFeedActivity extends ActionBarActivity {
 
     public void ClickPicture(View view) {
 
-        String name =   dateToString(new Date(),"yyyy-MM-dd-hh-mm-ss");
 
-       image = new File(pathMedia, name+".jpg");
+        photoFileName = (new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()))+".jpg";
 
-        Uri uriSavedImage = Uri.fromFile(image);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, getPhotoFileUri(photoFileName)); // set the image file name
 
-        imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
+        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
+        // So as long as the result is not null, it's safe to use the intent.
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            // Start the image capture intent to take photo
+            startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+        }
 
-        //Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 
-        startActivityForResult(imageIntent,1888);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Bitmap photo = null;
+        Bitmap photo;
 
-        photo = (Bitmap) data.getExtras().get("data");
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Uri takenPhotoUri = getPhotoFileUri(photoFileName);
+                Log.e("Camera",photoFileName);
+                // by this point we have the camera photo on disk
+                photo = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+                // RESIZE BITMAP, see section below
+                // Load the taken image into a preview
 
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == 1888 && resultCode == RESULT_OK) {
-
-            FileOutputStream fos = null;
-            try {
-                fos = new FileOutputStream(image);
-                if (fos != null) {
-                    photo.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.close();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else { // Result was a failure
+                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+                photo = null;
             }
+        }
+
+        else
+        {
+            photo = null;
+        }
 
 
-            ImageView imageView = (ImageView)findViewById(R.id.list_item_icon);
+
+        ImageView imageView = (ImageView)findViewById(R.id.list_item_icon);
 
             Log.e("CameraDemo", "Pic saved");
 
@@ -131,15 +133,30 @@ public class NewsFeedActivity extends ActionBarActivity {
 
             double longitude = location.getLongitude();
             double latitude = location.getLatitude();
-            geoTag(image.getAbsolutePath(),latitude,longitude);
+            geoTag(image_file.getAbsolutePath(),latitude,longitude);
 
+        Bitmap resized_image = Bitmap.createScaledBitmap(photo, (int)(photo.getWidth()*0.5), (int)(photo.getHeight()*0.5), true);
 
-
-            UploadClickedImage uploader = new UploadClickedImage(photo,this,UserData.SESSION_USER);
+            UploadClickedImage uploader = new UploadClickedImage(resized_image,this,UserData.SESSION_USER,latitude,longitude);
             uploader.execute();
 
             imageView.setImageBitmap(photo);
-        }
+
+    }
+
+
+    public Uri getPhotoFileUri(String fileName) {
+
+            image_file = new File(LoginActivity.imagesFolder.getPath() + File.separator + fileName);
+            // Return the file target for the photo based on filename
+            return Uri.fromFile(image_file);
+
+    }
+
+    // Returns true if external storage for photos is available
+    private boolean isExternalStorageAvailable() {
+        String state = Environment.getExternalStorageState();
+        return state.equals(Environment.MEDIA_MOUNTED);
     }
 
 
@@ -157,9 +174,12 @@ public class NewsFeedActivity extends ActionBarActivity {
             int num2Lon = (int)Math.floor((longitude - num1Lon) * 60);
             double num3Lon = (longitude - ((double)num1Lon+((double)num2Lon/60))) * 3600000;
 
+
             exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, num1Lat+"/1,"+num2Lat+"/1,"+num3Lat+"/1000");
             exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, num1Lon+"/1,"+num2Lon+"/1,"+num3Lon+"/1000");
 
+            Log.e("Geotag",exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+            Log.e("Geotag",exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
 
             if (latitude > 0) {
                 exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "N");
