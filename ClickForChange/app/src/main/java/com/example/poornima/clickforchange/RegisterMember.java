@@ -10,11 +10,11 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import CommunicationInterface.Communcation;
+import CommunicationInterface.Communication;
 import ServerSideAPIs.AddNewMember;
 
 
-public class RegisterMember extends ActionBarActivity implements Communcation {
+public class RegisterMember extends ActionBarActivity implements Communication {
 
     private String name;
     private String phone;
@@ -101,7 +101,7 @@ public class RegisterMember extends ActionBarActivity implements Communcation {
     }
 
     @Override
-    public void onComplition(String response) {
+    public void onCompletion(String response) {
 
         AdditionStatusText = response;
 

@@ -10,7 +10,13 @@
     android:gravity="center_horizontal"
     tools:context="com.example.poornima.clickforchange.RegisterMember">
 
+<ScrollView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
     <ImageView
         android:id="@+id/logo"
         android:layout_width="70dp"
@@ -132,5 +138,7 @@
         android:background="@color/colorPrimary"
         android:onClick="RegisterMember"
         />
+</LinearLayout>
+</ScrollView>
 
 </LinearLayout>

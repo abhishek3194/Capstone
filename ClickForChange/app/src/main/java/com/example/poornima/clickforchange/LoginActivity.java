@@ -18,18 +18,25 @@ import android.widget.Toast;
 
 import java.io.File;
 
-import CommunicationInterface.Communcation;
+import CommunicationInterface.Communication;
 import ServerSideAPIs.CheckLoginActivity;
 
 
-public class LoginActivity extends Activity implements Communcation {
+public class LoginActivity extends Activity implements Communication {
 
     private static final String LOG_TAG = "LOGIN: ";
     private EditText usernameField,passwordField;
 
+
+    public static String username;
+
+    public static String password;
+
     private String statusText = null;
 
     public static File imagesFolder;
+
+    public static File dataFolder;
 
     public final int PERMISSIONS_REQUEST_WRITE_STORAGE = 0;
 
@@ -38,43 +45,47 @@ public class LoginActivity extends Activity implements Communcation {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        //creating directory on the device
 
         imagesFolder = new File(Environment.getExternalStorageDirectory(), "/ClickForChange");
         imagesFolder.mkdirs();
 
 
-        if (!imagesFolder.mkdirs()) {
+        dataFolder = new File(Environment.getExternalStorageDirectory(), "/ClickForChange/data");
+        dataFolder.mkdirs();
 
-            int writePermissionCheck = ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int writePermissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-            int readPermissionCheck = ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE);
+        int readPermissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
 
 
-            if (writePermissionCheck != PackageManager.PERMISSION_GRANTED) {
+        if (!imagesFolder.mkdirs() || (PERMISSIONS_REQUEST_WRITE_STORAGE==0)||(writePermissionCheck != PackageManager.PERMISSION_GRANTED)) {
 
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
-                    // Show an expanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
-                } else {
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
 
-                    // No explanation needed, we can request the permission.
+            } else {
 
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            PERMISSIONS_REQUEST_WRITE_STORAGE);
+                // No explanation needed, we can request the permission.
 
-                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                    // app-defined int constant. The callback method gets the
-                    // result of the request.
-                }
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSIONS_REQUEST_WRITE_STORAGE);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
             }
+        }
+
 
             if (readPermissionCheck != PackageManager.PERMISSION_GRANTED) {
 
@@ -100,7 +111,7 @@ public class LoginActivity extends Activity implements Communcation {
                 }
             }
 
-        }
+
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
@@ -121,7 +132,19 @@ public class LoginActivity extends Activity implements Communcation {
                     imagesFolder = new File(Environment.getExternalStorageDirectory(), "/ClickForChange/");
                     imagesFolder.mkdirs();
 
+                    dataFolder = new File(Environment.getExternalStorageDirectory(), "/ClickForChange/data");
+                    dataFolder.mkdirs();
+
                     if (!imagesFolder.mkdirs()) {
+                        Log.e(LOG_TAG, "Directory not created");
+                        Log.e(LOG_TAG,imagesFolder.toString());
+                    }
+                    else
+                    {
+                        Log.e(LOG_TAG,imagesFolder.toString());
+                    }
+
+                    if (!dataFolder.mkdirs()) {
                         Log.e(LOG_TAG, "Directory not created");
                         Log.e(LOG_TAG,imagesFolder.toString());
                     }
@@ -174,8 +197,8 @@ public class LoginActivity extends Activity implements Communcation {
         usernameField = (EditText)findViewById(R.id.user_textView);
         passwordField = (EditText)findViewById(R.id.pass_textView);
 
-        String username = usernameField.getText().toString();
-        String password = passwordField.getText().toString();
+        username = usernameField.getText().toString();
+        password = passwordField.getText().toString();
 
 
 
@@ -191,7 +214,7 @@ public class LoginActivity extends Activity implements Communcation {
     }
 
     @Override
-    public void onComplition(String response) {
+    public void onCompletion(String response) {
         statusText = response;
         checkUserPass();
     }
@@ -206,6 +229,7 @@ public class LoginActivity extends Activity implements Communcation {
             UserData.SESSION_USER = usernameField.getText().toString();
             Intent intent = new Intent(this, NewsFeedActivity.class).putExtra(Intent.EXTRA_TEXT,statusText);
             startActivity(intent);
+            finish();
             //Toast.makeText(this,"Correct!",Toast.LENGTH_SHORT).show();
         }
         else

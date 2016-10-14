@@ -11,7 +11,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
-import CommunicationInterface.Communcation;
+import CommunicationInterface.Communication;
 
 /**
  * Created by poornima on 11/9/16.
@@ -85,8 +85,8 @@ import CommunicationInterface.Communcation;
 
         @Override
         protected void onPostExecute(String result){
-            Communcation l =  (Communcation)context;
-            l.onComplition(result);
+            Communication l =  (Communication)context;
+            l.onCompletion(result);
 
         }
 

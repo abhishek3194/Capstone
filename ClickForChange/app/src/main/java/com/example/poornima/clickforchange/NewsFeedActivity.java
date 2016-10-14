@@ -4,13 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.hardware.Camera;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,7 +35,7 @@ import ServerSideAPIs.UploadClickedImage;
 public class NewsFeedActivity extends ActionBarActivity {
 
 
-    public final String APP_TAG = "CAMERA";
+    public final String APP_TAG = "CAMERA_TAG";
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public String photoFileName;
 
@@ -43,6 +44,7 @@ public class NewsFeedActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news_feed);
         if (savedInstanceState == null) {
@@ -120,7 +122,7 @@ public class NewsFeedActivity extends ActionBarActivity {
 
 
 
-        ImageView imageView = (ImageView)findViewById(R.id.list_item_icon);
+            ImageView imageView = (ImageView)findViewById(R.id.list_item_icon);
 
             Log.e("CameraDemo", "Pic saved");
 
@@ -135,12 +137,12 @@ public class NewsFeedActivity extends ActionBarActivity {
             double latitude = location.getLatitude();
             geoTag(image_file.getAbsolutePath(),latitude,longitude);
 
-        Bitmap resized_image = Bitmap.createScaledBitmap(photo, (int)(photo.getWidth()*0.5), (int)(photo.getHeight()*0.5), true);
+            Bitmap resized_image = Bitmap.createScaledBitmap(photo, (int)(photo.getWidth()*0.5), (int)(photo.getHeight()*0.5), true);
 
             UploadClickedImage uploader = new UploadClickedImage(resized_image,this,UserData.SESSION_USER,latitude,longitude);
             uploader.execute();
 
-            imageView.setImageBitmap(photo);
+            imageView.setImageBitmap(resized_image);
 
     }
 
@@ -149,6 +151,7 @@ public class NewsFeedActivity extends ActionBarActivity {
 
             image_file = new File(LoginActivity.imagesFolder.getPath() + File.separator + fileName);
             // Return the file target for the photo based on filename
+            Log.e(APP_TAG,Uri.fromFile(image_file).toString());
             return Uri.fromFile(image_file);
 
     }
@@ -200,23 +203,6 @@ public class NewsFeedActivity extends ActionBarActivity {
 
     }
 
-    public String dateToString(Date date, String format) {
-        SimpleDateFormat df = new SimpleDateFormat(format);
-        return df.format(date);
-    }
-
-
-    public static Camera getCameraInstance(){
-        Camera c = null;
-        try {
-            c = Camera.open(); // attempt to get a Camera instance
-        }
-        catch (Exception e){
-            // Camera is not available (in use or does not exist)
-        }
-        return c; // returns null if camera is unavailable
-    }
-
 
     /**
      * A placeholder fragment containing a simple view.
@@ -233,4 +219,39 @@ public class NewsFeedActivity extends ActionBarActivity {
             return rootView;
         }
     }
+
+    private Boolean exit = false;
+
+    public static  File credentialsFile = new File(LoginActivity.dataFolder, "secret");
+    @Override
+    public void onBackPressed() {
+        if (exit) {
+            finish(); // finish activity
+        } else {
+            Toast.makeText(this, "Press Back again to Exit.",
+                    Toast.LENGTH_SHORT).show();
+
+            FileWriter writer = null;
+            try {
+                writer = new FileWriter(credentialsFile);
+                writer.write(LoginActivity.username+"\n");
+                writer.append(LoginActivity.password);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            exit = true;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    exit = false;
+                }
+            }, 3000);
+
+        }
+
+    }
+
 }
