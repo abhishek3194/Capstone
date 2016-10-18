@@ -97,7 +97,7 @@ public class UploadClickedImage extends AsyncTask<Void,Void,String>{
     @Override
     protected void onPostExecute(String s) {
         //show image uploaded
-       if(statusText=="Successful")
+       if(statusText.equals("Successful"))
        {
            Toast.makeText(context,"Image Uploaded",Toast.LENGTH_SHORT).show();
        }

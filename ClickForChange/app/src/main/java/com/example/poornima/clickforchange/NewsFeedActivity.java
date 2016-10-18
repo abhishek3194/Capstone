@@ -1,15 +1,13 @@
 package com.example.poornima.clickforchange;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.location.LocationManager;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
@@ -30,16 +28,24 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ServerSideAPIs.UploadClickedImage;
+import Utils.GPSTracker;
 
 
 public class NewsFeedActivity extends ActionBarActivity {
 
 
-    public final String APP_TAG = "CAMERA_TAG";
-    public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
+    public final String APP_TAG = "CAMERA_LOCATION_TAG";
+    public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 0;
     public String photoFileName;
 
     public File image_file;
+
+    private LocationManager locationManager;
+
+
+
+    double longitude=30;
+    double latitude=30;
 
 
     @Override
@@ -52,6 +58,21 @@ public class NewsFeedActivity extends ActionBarActivity {
                     .add(R.id.container, new NewsFeedFragment())
                     .commit();
         }
+
+        GPSTracker gps = new GPSTracker(this);
+        if(gps.canGetLocation())
+        {
+            latitude = gps.getLatitude(); // returns latitude
+            longitude = gps.getLongitude(); // returns longitude
+
+            Log.e(APP_TAG, String.valueOf(latitude));
+            Log.e(APP_TAG, String.valueOf(longitude));
+        }
+        else
+        {
+            gps.showSettingsAlert();
+        }
+
     }
 
 
@@ -98,29 +119,6 @@ public class NewsFeedActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Bitmap photo;
-
-        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Uri takenPhotoUri = getPhotoFileUri(photoFileName);
-                Log.e("Camera",photoFileName);
-                // by this point we have the camera photo on disk
-                photo = BitmapFactory.decodeFile(takenPhotoUri.getPath());
-                // RESIZE BITMAP, see section below
-                // Load the taken image into a preview
-
-            } else { // Result was a failure
-                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
-                photo = null;
-            }
-        }
-
-        else
-        {
-            photo = null;
-        }
-
-
 
             ImageView imageView = (ImageView)findViewById(R.id.list_item_icon);
 
@@ -128,21 +126,43 @@ public class NewsFeedActivity extends ActionBarActivity {
 
 
 
-            //Log.v("code",encoded);
+        Bitmap photo=null;
 
-            LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-            Location location = (Location) lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-            double longitude = location.getLongitude();
-            double latitude = location.getLatitude();
-            geoTag(image_file.getAbsolutePath(),latitude,longitude);
+        if (resultCode == RESULT_OK) {
 
-            Bitmap resized_image = Bitmap.createScaledBitmap(photo, (int)(photo.getWidth()*0.5), (int)(photo.getHeight()*0.5), true);
+            if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
 
-            UploadClickedImage uploader = new UploadClickedImage(resized_image,this,UserData.SESSION_USER,latitude,longitude);
-            uploader.execute();
+                if(photo!=null)
+                {
+                    Uri takenPhotoUri = getPhotoFileUri(photoFileName);
 
-            imageView.setImageBitmap(resized_image);
+                    Log.e("Camera", photoFileName);
+                    // by this point we have the camera photo on disk
+                    photo = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+                    // RESIZE BITMAP, see section below
+                    // Load the taken image into a preview
+
+                    Log.e(APP_TAG, image_file.getAbsolutePath());
+                    geoTag(image_file.getAbsolutePath(), latitude, longitude);
+
+                    imageView.setImageBitmap(photo);
+
+                    UploadClickedImage uploader = new UploadClickedImage(photo, this, UserData.SESSION_USER, latitude, longitude);
+                    uploader.execute();
+                }
+
+            }
+            else { // Result was a failure
+                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+                setContentView(R.layout.activity_news_feed);
+            }
+        }
+        else if (resultCode == Activity.RESULT_CANCELED)
+        {
+            Toast.makeText(this,"Camera Exited",Toast.LENGTH_LONG).show();
+            Log.d(APP_TAG,"Camera Exited");
+        }
 
     }
 
@@ -157,10 +177,33 @@ public class NewsFeedActivity extends ActionBarActivity {
     }
 
     // Returns true if external storage for photos is available
-    private boolean isExternalStorageAvailable() {
+   /* private boolean isExternalStorageAvailable() {
         String state = Environment.getExternalStorageState();
         return state.equals(Environment.MEDIA_MOUNTED);
-    }
+    }*/
+
+    /*private void showAlert()
+    {
+        Log.e("ALERT:","inside showAlert()");
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle("Enable Location").setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " +
+                        "use this app")
+                .setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(myIntent);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    }
+                });
+        dialog.show();
+    }*/
 
 
     public void geoTag(String filename, double latitude, double longitude){

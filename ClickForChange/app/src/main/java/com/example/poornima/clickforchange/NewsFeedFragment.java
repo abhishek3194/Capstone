@@ -40,20 +40,7 @@ public class NewsFeedFragment extends Fragment {
 
     public FeedAdapter forecast_adapter;
 
-    private String[] feedArray = {"Monday-Sunny-88/63",
-    "Tuesday-Sunny-88/63",
-            "Wednesday-Cloudy-88/63",
-            "Thursday-Cloudy-88/63",
-            "Friday-Rainy-88/63",
-            "Saturday-Cloudy-88/63",
-            "Sunday-Sunny-88/63",
-            "Monday-Sunny-88/63",
-            "Tuesday-Sunny-88/63",
-            "Wednesday-Cloudy-88/63",
-            "Thursday-Cloudy-88/63",
-            "Friday-Rainy-88/63",
-            "Saturday-Cloudy-88/63",
-            "Sunday-Sunny-88/63"};
+    private String[] feedArray = {"Monday-Sunny-88/63"};
 
     public NewsFeedFragment() {
 
