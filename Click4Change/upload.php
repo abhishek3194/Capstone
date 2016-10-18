@@ -1,5 +1,3 @@
-hpPHP
-
 <?php
 
 
@@ -7,6 +5,13 @@ include "config.php";
 		
 		$image = $_POST['image'];
         $user = $_POST['user_id'];
+        $latitude = $_POST['latitude'];
+		$longitude = $_POST['longitude'];
+
+		echo $user;
+		echo $latitude;
+		echo $longitude;
+
 
         $name = mysqli_real_escape_string($conn,$user);
 	
@@ -24,9 +29,9 @@ include "config.php";
 
 		}
 
-		$filename = $user."_prob_".$prob_num.".jpg";
+		$filename = "prob_images/".$user."_prob_".$prob_num.".jpg";
 		
-		$path = "/var/www/html/Click4Change/prob_images/".$filename;
+		$path = "/var/www/html/Click4Change/".$filename;
 
 		$prob_id = $user."_prob_".$prob_num;
 
@@ -39,14 +44,12 @@ include "config.php";
 		$date_time =  $date->format('Y-m-d H:i:s');
 			
 		
-		$sql = "INSERT INTO problems(prob_id, prob_type, location_id, user_id, date_time, num_reactions) VALUES ('$prob_id',0,0,'$name','$date_time',0)";
+		$sql = "INSERT INTO problems(prob_id,prob_img, prob_type, location_id, latitude, longitude, user_id, date_time, num_reactions) VALUES ('$prob_id','$filename',0,0,'$latitude','$longitude','$name','$date_time',0)";
 
 		$query=mysqli_query($conn,$sql);
 		
 		if($query){
-			//file_put_contents($path,base64_decode($image));
-			//echo $path;
-
+			
 			$imageData = base64_decode($image);
 			$source = imagecreatefromstring($imageData);
 			
